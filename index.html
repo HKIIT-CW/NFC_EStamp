@@ -3,131 +3,266 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NFC 集章換禮品</title>
+  <title>NFC 探索集章換禮品</title>
+  <!-- 引入 Tailwind CSS 方便樣式微調與佈局 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入 FontAwesome 圖標庫 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #f4f6f8; text-align: center; padding: 20px; color: #333; }
-    .card { background: white; border-radius: 16px; padding: 24px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    h1 { font-size: 22px; margin-bottom: 8px; }
-    .status-msg { margin: 16px 0; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; }
-    .status-success { background: #e6f4ea; color: #137333; }
-    .status-info { background: #e8f0fe; color: #1a73e8; }
-    .status-warn { background: #fef7e0; color: #b06000; }
-    
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
-    .spot-box { border: 2px dashed #ccc; border-radius: 12px; padding: 20px 10px; font-weight: bold; color: #aaa; background: #fafafa; }
-    .spot-box.active { border-style: solid; border-color: #34a853; background: #e6f4ea; color: #137333; }
-
-    .reward-btn { background: #34a853; color: white; border: none; padding: 14px 28px; font-size: 16px; font-weight: bold; border-radius: 30px; cursor: pointer; width: 100%; display: none; }
-    .reset-btn { background: transparent; border: 1px solid #999; color: #666; margin-top: 20px; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+    @keyframes pulse-glow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    .animate-pulse-glow { animation: pulse-glow 2s infinite ease-in-out; }
+    .stamp-unlocked {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+    }
   </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-center items-center p-4 font-sans antialiased">
 
-  <div class="card">
-    <h1>NFC 活動集章卡</h1>
-    <p style="color: #666; font-size: 14px;">請用手機尋找並拍齊 4 個 Checkpoint</p>
+  <!-- 主卡片容器 -->
+  <div class="w-full max-w-md bg-slate-800/90 backdrop-blur-md rounded-3xl p-6 border border-slate-700 shadow-2xl relative overflow-hidden">
+    
+    <!-- 頂部裝飾背景光暈 -->
+    <div class="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div id="statusMsg" class="status-msg status-info">歡迎加入打卡活動！</div>
-
-    <div class="grid">
-      <div id="card_spot_01" class="spot-box">點 1 未打卡</div>
-      <div id="card_spot_02" class="spot-box">點 2 未打卡</div>
-      <div id="card_spot_03" class="spot-box">點 3 未打卡</div>
-      <div id="card_spot_04" class="spot-box">點 4 未打卡</div>
+    <!-- 頂部 HKIIT 機構 LOGO 區 -->
+    <div class="flex justify-start items-center mb-4 border-b border-slate-700/60 pb-4">
+      <img src="https://hkiit-cw.github.io/NFC_EStamp/HKIIT_endorsement_logo_Single_color_horizontal_reverse.png" alt="HKIIT Member of VTC Group" class="h-20 max-w-full object-contain drop-shadow">
     </div>
 
-    <button id="rewardBtn" class="reward-btn" onclick="claimReward()">🎉 立即兌換禮品 (出示給工作人員)</button>
+    <!-- 標題區 -->
+    <div class="text-center mb-6">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-3">
+        <i class="fa-solid fa-nfc-symbol"></i> NFC 限時集章活動
+      </span>
+      <h1 class="text-2xl font-bold tracking-tight text-white">城市探索打卡挑戰</h1>
+      <p class="text-slate-400 text-sm mt-1">尋找並拍齊 4 個 Checkpoint 即可兌換限量好禮</p>
+    </div>
 
-    <button class="reset-btn" onclick="resetProgress()">清除紀錄 (測試用)</button>
+    <!-- 進度條 -->
+    <div class="mb-6 bg-slate-700/50 p-4 rounded-2xl border border-slate-700/50">
+      <div class="flex justify-between items-center mb-2 text-xs font-semibold">
+        <span class="text-slate-300">集章進度</span>
+        <span id="progressText" class="text-indigo-400 font-mono text-sm">0 / 4</span>
+      </div>
+      <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden p-0.5 border border-slate-700">
+        <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500 w-0"></div>
+      </div>
+    </div>
+
+    <!-- 即時動態提示訊息欄 -->
+    <div id="statusBox" class="mb-6 p-3.5 rounded-xl text-sm font-medium flex items-center gap-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
+      <i id="statusIcon" class="fa-solid fa-circle-info text-base shrink-0"></i>
+      <span id="statusText" class="leading-snug">歡迎！請將手機靠近第一個 Checkpoint 開始打卡。</span>
+    </div>
+
+    <!-- 4 個 Checkpoint 印章網格 (已更新名稱) -->
+    <div class="grid grid-cols-2 gap-3 mb-6">
+      <!-- Spot 1: 數碼媒體科技 -->
+      <div id="card_spot_01" class="relative group p-4 rounded-2xl bg-slate-900/60 border border-slate-700/60 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px]">
+        <div id="icon_spot_01" class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <span class="text-xs font-semibold text-slate-300 leading-tight">數碼媒體科技</span>
+        <span id="label_spot_01" class="text-[11px] text-slate-500 mt-1 font-mono">未解鎖</span>
+      </div>
+
+      <!-- Spot 2: 遊戲軟件開發 -->
+      <div id="card_spot_02" class="relative group p-4 rounded-2xl bg-slate-900/60 border border-slate-700/60 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px]">
+        <div id="icon_spot_02" class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <span class="text-xs font-semibold text-slate-300 leading-tight">遊戲軟件開發</span>
+        <span id="label_spot_02" class="text-[11px] text-slate-500 mt-1 font-mono">未解鎖</span>
+      </div>
+
+      <!-- Spot 3: 人工智能及智慧科技 -->
+      <div id="card_spot_03" class="relative group p-4 rounded-2xl bg-slate-900/60 border border-slate-700/60 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px]">
+        <div id="icon_spot_03" class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <span class="text-xs font-semibold text-slate-300 leading-tight">人工智能及智慧科技</span>
+        <span id="label_spot_03" class="text-[11px] text-slate-500 mt-1 font-mono">未解鎖</span>
+      </div>
+
+      <!-- Spot 4: 網路安全 -->
+      <div id="card_spot_04" class="relative group p-4 rounded-2xl bg-slate-900/60 border border-slate-700/60 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px]">
+        <div id="icon_spot_04" class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <span class="text-xs font-semibold text-slate-300 leading-tight">網路安全</span>
+        <span id="label_spot_04" class="text-[11px] text-slate-500 mt-1 font-mono">未解鎖</span>
+      </div>
+    </div>
+
+    <!-- 兌換按鈕 -->
+    <button id="rewardBtn" onclick="openRewardModal()" disabled class="w-full py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 bg-slate-700 text-slate-400 cursor-not-allowed">
+      <i class="fa-solid fa-gift"></i>
+      <span>集齊 4 個章即可換領禮品</span>
+    </button>
+
+    <!-- 測試用重設按鈕 -->
+    <div class="mt-4 text-center">
+      <button onclick="resetProgress()" class="text-xs text-slate-500 hover:text-slate-400 transition-colors underline decoration-dotted underline-offset-4">
+        重設打卡進度 (測試用)
+      </button>
+    </div>
+  </div>
+
+  <!-- 禮品兌換 Modal 彈出視窗 -->
+  <div id="rewardModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl transform scale-95 transition-transform duration-300" id="modalContent">
+      <div class="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 border border-emerald-500/20 animate-bounce">
+        <i class="fa-solid fa-gift"></i>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-1">恭喜完成任務！</h3>
+      <p class="text-xs text-slate-400 mb-4">請向工作人員出示此兌換視窗</p>
+
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-4 mb-5">
+        <span class="text-[10px] text-slate-500 block uppercase font-mono tracking-wider mb-1">兌換確認碼</span>
+        <span id="rewardCode" class="text-2xl font-mono font-bold text-emerald-400 tracking-widest">---</span>
+      </div>
+
+      <button onclick="closeRewardModal()" class="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold text-sm rounded-xl transition-colors">
+        關閉視窗
+      </button>
+    </div>
   </div>
 
   <script>
     const ALL_SPOTS = ['spot_01', 'spot_02', 'spot_03', 'spot_04'];
 
-    // 取得已打卡紀錄
     function getHistory() {
       const data = localStorage.getItem('nfc_stamp_history');
       return data ? JSON.parse(data) : [];
     }
 
-    // 更新介面 UI
-    function updateUI(history, message, msgType) {
-      // 更新印章狀態
-      ALL_SPOTS.forEach((spotId, index) => {
-        const elem = document.getElementById(`card_${spotId}`);
+    function updateUI(history, message, type = 'info') {
+      const count = history.length;
+      
+      const percent = (count / ALL_SPOTS.length) * 100;
+      document.getElementById('progressBar').style.width = `${percent}%`;
+      document.getElementById('progressText').innerText = `${count} / ${ALL_SPOTS.length}`;
+
+      ALL_SPOTS.forEach((spotId) => {
+        const card = document.getElementById(`card_${spotId}`);
+        const icon = document.getElementById(`icon_${spotId}`);
+        const label = document.getElementById(`label_${spotId}`);
+
         if (history.includes(spotId)) {
-          elem.classList.add('active');
-          elem.innerText = `點 ${index + 1} ✓`;
+          card.className = "relative group p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/40 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px]";
+          icon.className = "w-10 h-10 rounded-full stamp-unlocked text-white flex items-center justify-center text-base mb-2 transition-all";
+          icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+          label.className = "text-[11px] text-emerald-400 font-semibold mt-1 font-mono";
+          label.innerText = "已完成";
         } else {
-          elem.classList.remove('active');
-          elem.innerText = `點 ${index + 1} 未打卡`;
+          card.className = "relative group p-4 rounded-2xl bg-slate-900/60 border border-slate-700/60 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px]";
+          icon.className = "w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all";
+          icon.innerHTML = '<i class="fa-solid fa-lock"></i>';
+          label.className = "text-[11px] text-slate-500 mt-1 font-mono";
+          label.innerText = "未解鎖";
         }
       });
 
-      // 更新訊息列
-      const msgElem = document.getElementById('statusMsg');
-      if (message) {
-        msgElem.innerText = message;
-        msgElem.className = `status-msg status-${msgType || 'info'}`;
+      const statusBox = document.getElementById('statusBox');
+      const statusIcon = document.getElementById('statusIcon');
+      const statusText = document.getElementById('statusText');
+
+      statusText.innerText = message;
+
+      if (type === 'success') {
+        statusBox.className = "mb-6 p-3.5 rounded-xl text-sm font-medium flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300";
+        statusIcon.className = "fa-solid fa-circle-check text-base shrink-0 text-emerald-400";
+      } else if (type === 'warn') {
+        statusBox.className = "mb-6 p-3.5 rounded-xl text-sm font-medium flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 text-amber-300";
+        statusIcon.className = "fa-solid fa-triangle-exclamation text-base shrink-0 text-amber-400";
+      } else {
+        statusBox.className = "mb-6 p-3.5 rounded-xl text-sm font-medium flex items-center gap-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300";
+        statusIcon.className = "fa-solid fa-circle-info text-base shrink-0 text-indigo-400";
       }
 
-      // 判斷是否滿 4 個解鎖禮品按鈕
-      if (history.length >= ALL_SPOTS.length) {
-        document.getElementById('rewardBtn').style.display = 'block';
+      const rewardBtn = document.getElementById('rewardBtn');
+      if (count >= ALL_SPOTS.length) {
+        rewardBtn.disabled = false;
+        rewardBtn.className = "w-full py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25 cursor-pointer animate-pulse-glow";
+        rewardBtn.innerHTML = '<i class="fa-solid fa-gift text-base"></i><span>🎉 立即兌換禮品</span>';
+      } else {
+        rewardBtn.disabled = true;
+        rewardBtn.className = "w-full py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 bg-slate-700 text-slate-400 cursor-not-allowed";
+        rewardBtn.innerHTML = `<i class="fa-solid fa-gift"></i><span>還差 ${ALL_SPOTS.length - count} 個印章即可換領禮品</span>`;
       }
     }
 
-    // 處理打卡邏輯 (核心去重邏輯)
     function processCheckin() {
       const urlParams = new URLSearchParams(window.location.search);
       const currentSpot = urlParams.get('spot');
       let history = getHistory();
 
       if (!currentSpot) {
-        // 第一粒 NFC 拍卡進入（沒有 spot 參數）或直接開啟網址
-        const msg = history.length === 4 
-          ? '你已經集齊所有印章，可出示下方按鈕換領禮品！' 
-          : `目前進度：${history.length} / 4。請繼續尋找 Checkpoint 拍卡！`;
+        const msg = history.length === ALL_SPOTS.length
+          ? '你已集齊所有印章，請點擊下方按鈕領取禮品！'
+          : `歡迎！目前進度 ${history.length}/4，請尋找下一個 Checkpoint 拍卡。`;
         updateUI(history, msg, 'info');
         return;
       }
 
-      // 檢查是否為有效的 spot 參數
       if (!ALL_SPOTS.includes(currentSpot)) {
-        updateUI(history, '無效的打卡點 NFC！', 'warn');
+        updateUI(history, '讀取到未知的 NFC 打卡點！', 'warn');
         return;
       }
 
-      // 核心去重：如果已經打過卡
       if (history.includes(currentSpot)) {
-        updateUI(history, `⚠️ 這個 Checkpoint 已經打過卡囉！目前進度：${history.length}/4`, 'warn');
+        updateUI(history, `這個 Checkpoint 之前已經打過卡囉！目前進度 ${history.length}/4。`, 'warn');
         return;
       }
 
-      // 新增打卡點並寫回 localStorage
       history.push(currentSpot);
       localStorage.setItem('nfc_stamp_history', JSON.stringify(history));
 
       if (history.length === ALL_SPOTS.length) {
-        updateUI(history, '🎉 恭喜你！集齊 4 個 Checkpoint，可換領禮品！', 'success');
+        updateUI(history, '恭喜你！已集齊 4 個 Checkpoint 印章！', 'success');
+        openRewardModal();
       } else {
-        updateUI(history, `✅ 打卡成功！進度：${history.length} / 4`, 'success');
+        updateUI(history, `打卡成功！已收集 ${history.length}/4 個印章。`, 'success');
       }
     }
 
-    function claimReward() {
-      alert('兌換成功！兌換碼：REWARD-' + Math.floor(1000 + Math.random() * 9000));
+    function openRewardModal() {
+      const modal = document.getElementById('rewardModal');
+      const content = document.getElementById('modalContent');
+      
+      let savedCode = localStorage.getItem('nfc_reward_code');
+      if (!savedCode) {
+        savedCode = 'GIFT-' + Math.floor(1000 + Math.random() * 9000);
+        localStorage.setItem('nfc_reward_code', savedCode);
+      }
+      document.getElementById('rewardCode').innerText = savedCode;
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      content.classList.remove('scale-95');
+      content.classList.add('scale-100');
+    }
+
+    function closeRewardModal() {
+      const modal = document.getElementById('rewardModal');
+      const content = document.getElementById('modalContent');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      content.classList.remove('scale-100');
+      content.classList.add('scale-95');
     }
 
     function resetProgress() {
-      if (confirm('確定要清空所有打卡紀錄嗎？')) {
+      if (confirm('確定要清空所有打卡紀錄並重試嗎？')) {
         localStorage.removeItem('nfc_stamp_history');
+        localStorage.removeItem('nfc_reward_code');
         window.location.href = window.location.pathname;
       }
     }
 
-    // 網頁載入時自動執行打卡判斷
     processCheckin();
   </script>
 </body>

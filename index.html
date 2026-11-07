@@ -37,9 +37,9 @@
     <!-- 標題區 -->
     <div class="text-center mb-6">
       <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-3">
-        <i class="fa-solid fa-nfc-symbol"></i> NFC 限時集章活動
+        <i class="fa-solid fa-nfc-symbol"></i> HKIIT 限時集章活動
       </span>
-      <h1 class="text-2xl font-bold tracking-tight text-white">城市探索打卡挑戰</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-white">資訊日打卡挑戰</h1>
       <p class="text-slate-400 text-sm mt-1">尋找並拍齊 4 個 Checkpoint 即可兌換限量好禮</p>
     </div>
 
@@ -105,7 +105,7 @@
       <span>集齊 4 個章即可換領禮品</span>
     </button>
 
-    <!-- 測試用重設按鈕 -->
+    <!-- 測試用重設按鈕 (需輸入密碼: king) -->
     <div class="mt-4 text-center">
       <button onclick="resetProgress()" class="text-xs text-slate-500 hover:text-slate-400 transition-colors underline decoration-dotted underline-offset-4">
         重設打卡進度 (測試用)
@@ -136,9 +136,8 @@
   <!-- 載入 Firebase 模組 (ESM) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, get, set, goOffline } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // ⚠️ 替換成你自己在 Firebase Console 取得的設定檔內容
     const firebaseConfig = {
       apiKey: "AIzaSyBBuhkwjqLrHXu0DQfSvQAKXQw64-ODj98",
       authDomain: "hkiit-nfc-stamp.firebaseapp.com",
@@ -233,7 +232,6 @@
       rewardBtn.disabled = true;
 
       try {
-        // 從 Firebase Realtime Database 檢查此 Device ID 是否已經換過禮物
         const deviceRef = ref(db, `redemptions/${deviceId}`);
         const snapshot = await get(deviceRef);
 
@@ -244,7 +242,6 @@
           return;
         }
 
-        // 若未換過，生成固定兌換碼並寫入 Firebase 鎖定
         let savedCode = localStorage.getItem('nfc_reward_code');
         if (!savedCode) {
           savedCode = 'GIFT-' + Math.floor(1000 + Math.random() * 9000);
@@ -258,7 +255,9 @@
           userAgent: navigator.userAgent
         });
 
-        // 打開禮物 Modal
+        // 寫入完成後主動釋放 Firebase 連線
+        goOffline(db);
+
         document.getElementById('rewardCode').innerText = savedCode;
         openRewardModal();
         updateUI(getHistory(), '🎉 已成功完成兌換！', 'success');
@@ -321,11 +320,16 @@
     }
 
     function resetProgress() {
-      if (confirm('確定要清空所有打卡與兌換紀錄嗎？(僅清空此手機)')) {
-        localStorage.removeItem('nfc_stamp_history');
-        localStorage.removeItem('nfc_reward_code');
-        localStorage.removeItem('nfc_device_id');
-        window.location.href = window.location.pathname;
+      const pwd = prompt('請輸入管理員密碼以重設打卡紀錄：');
+      if (pwd === 'king') {
+        if (confirm('密碼正確！確定要清空所有打卡與兌換紀錄嗎？(僅清空此手機)')) {
+          localStorage.removeItem('nfc_stamp_history');
+          localStorage.removeItem('nfc_reward_code');
+          localStorage.removeItem('nfc_device_id');
+          window.location.href = window.location.pathname;
+        }
+      } else if (pwd !== null) {
+        alert('密碼錯誤！無法重設進度。');
       }
     }
 

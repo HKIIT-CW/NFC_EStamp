@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NFC 集章換禮品</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #f4f6f8; text-align: center; padding: 20px; color: #333; }
+    .card { background: white; border-radius: 16px; padding: 24px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    h1 { font-size: 22px; margin-bottom: 8px; }
+    .status-msg { margin: 16px 0; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; }
+    .status-success { background: #e6f4ea; color: #137333; }
+    .status-info { background: #e8f0fe; color: #1a73e8; }
+    .status-warn { background: #fef7e0; color: #b06000; }
+    
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+    .spot-box { border: 2px dashed #ccc; border-radius: 12px; padding: 20px 10px; font-weight: bold; color: #aaa; background: #fafafa; }
+    .spot-box.active { border-style: solid; border-color: #34a853; background: #e6f4ea; color: #137333; }
+
+    .reward-btn { background: #34a853; color: white; border: none; padding: 14px 28px; font-size: 16px; font-weight: bold; border-radius: 30px; cursor: pointer; width: 100%; display: none; }
+    .reset-btn { background: transparent; border: 1px solid #999; color: #666; margin-top: 20px; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>NFC 活動集章卡</h1>
+    <p style="color: #666; font-size: 14px;">請用手機尋找並拍齊 4 個 Checkpoint</p>
+
+    <div id="statusMsg" class="status-msg status-info">歡迎加入打卡活動！</div>
+
+    <div class="grid">
+      <div id="card_spot_01" class="spot-box">點 1 未打卡</div>
+      <div id="card_spot_02" class="spot-box">點 2 未打卡</div>
+      <div id="card_spot_03" class="spot-box">點 3 未打卡</div>
+      <div id="card_spot_04" class="spot-box">點 4 未打卡</div>
+    </div>
+
+    <button id="rewardBtn" class="reward-btn" onclick="claimReward()">🎉 立即兌換禮品 (出示給工作人員)</button>
+
+    <button class="reset-btn" onclick="resetProgress()">清除紀錄 (測試用)</button>
+  </div>
+
+  <script>
+    const ALL_SPOTS = ['spot_01', 'spot_02', 'spot_03', 'spot_04'];
+
+    // 取得已打卡紀錄
+    function getHistory() {
+      const data = localStorage.getItem('nfc_stamp_history');
+      return data ? JSON.parse(data) : [];
+    }
+
+    // 更新介面 UI
+    function updateUI(history, message, msgType) {
+      // 更新印章狀態
+      ALL_SPOTS.forEach((spotId, index) => {
+        const elem = document.getElementById(`card_${spotId}`);
+        if (history.includes(spotId)) {
+          elem.classList.add('active');
+          elem.innerText = `點 ${index + 1} ✓`;
+        } else {
+          elem.classList.remove('active');
+          elem.innerText = `點 ${index + 1} 未打卡`;
+        }
+      });
+
+      // 更新訊息列
+      const msgElem = document.getElementById('statusMsg');
+      if (message) {
+        msgElem.innerText = message;
+        msgElem.className = `status-msg status-${msgType || 'info'}`;
+      }
+
+      // 判斷是否滿 4 個解鎖禮品按鈕
+      if (history.length >= ALL_SPOTS.length) {
+        document.getElementById('rewardBtn').style.display = 'block';
+      }
+    }
+
+    // 處理打卡邏輯 (核心去重邏輯)
+    function processCheckin() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentSpot = urlParams.get('spot');
+      let history = getHistory();
+
+      if (!currentSpot) {
+        // 第一粒 NFC 拍卡進入（沒有 spot 參數）或直接開啟網址
+        const msg = history.length === 4 
+          ? '你已經集齊所有印章，可出示下方按鈕換領禮品！' 
+          : `目前進度：${history.length} / 4。請繼續尋找 Checkpoint 拍卡！`;
+        updateUI(history, msg, 'info');
+        return;
+      }
+
+      // 檢查是否為有效的 spot 參數
+      if (!ALL_SPOTS.includes(currentSpot)) {
+        updateUI(history, '無效的打卡點 NFC！', 'warn');
+        return;
+      }
+
+      // 核心去重：如果已經打過卡
+      if (history.includes(currentSpot)) {
+        updateUI(history, `⚠️ 這個 Checkpoint 已經打過卡囉！目前進度：${history.length}/4`, 'warn');
+        return;
+      }
+
+      // 新增打卡點並寫回 localStorage
+      history.push(currentSpot);
+      localStorage.setItem('nfc_stamp_history', JSON.stringify(history));
+
+      if (history.length === ALL_SPOTS.length) {
+        updateUI(history, '🎉 恭喜你！集齊 4 個 Checkpoint，可換領禮品！', 'success');
+      } else {
+        updateUI(history, `✅ 打卡成功！進度：${history.length} / 4`, 'success');
+      }
+    }
+
+    function claimReward() {
+      alert('兌換成功！兌換碼：REWARD-' + Math.floor(1000 + Math.random() * 9000));
+    }
+
+    function resetProgress() {
+      if (confirm('確定要清空所有打卡紀錄嗎？')) {
+        localStorage.removeItem('nfc_stamp_history');
+        window.location.href = window.location.pathname;
+      }
+    }
+
+    // 網頁載入時自動執行打卡判斷
+    processCheckin();
+  </script>
+</body>
+</html>

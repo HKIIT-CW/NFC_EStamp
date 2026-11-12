@@ -149,14 +149,14 @@
 
     // ⚠️ 替換成你自己在 Firebase Console 取得的設定檔內容
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-      projectId: "YOUR_PROJECT",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abcdef123456"
-    };
+      apiKey: "AIzaSyBBuhkwjqLrHXu0DQfSvQAKXQw64-ODj98",
+      authDomain: "hkiit-nfc-stamp.firebaseapp.com",
+      databaseURL: "https://hkiit-nfc-stamp-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "hkiit-nfc-stamp",
+      storageBucket: "hkiit-nfc-stamp.firebasestorage.app",
+      messagingSenderId: "1093481627008",
+      appId: "1:1093481627008:web:35e8c383d475b144c61565"
+     };
 
     // 初始化 Firebase
     const app = initializeApp(firebaseConfig);
@@ -331,7 +331,7 @@
       content.classList.add('scale-95');
     }
 
-    // 密碼保護重設邏輯 (密碼：king)
+    
     function resetProgress() {
       const pwd = prompt('請輸入管理員密碼以重設打卡紀錄：');
       if (pwd === 'king') {

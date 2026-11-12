@@ -40,14 +40,14 @@
         <i class="fa-solid fa-nfc-symbol"></i> HKIIT 限時集章活動
       </span>
       <h1 class="text-2xl font-bold tracking-tight text-white">資訊日打卡挑戰</h1>
-      <p class="text-slate-400 text-sm mt-1">尋找並拍齊 4 個 Checkpoint 即可兌換限量好禮</p>
+      <p class="text-slate-400 text-sm mt-1">尋找並拍齊 5 個 Checkpoint 即可兌換限量好禮</p>
     </div>
 
     <!-- 進度條 -->
     <div class="mb-6 bg-slate-700/50 p-4 rounded-2xl border border-slate-700/50">
       <div class="flex justify-between items-center mb-2 text-xs font-semibold">
         <span class="text-slate-300">集章進度</span>
-        <span id="progressText" class="text-indigo-400 font-mono text-sm">0 / 4</span>
+        <span id="progressText" class="text-indigo-400 font-mono text-sm">0 / 5</span>
       </div>
       <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden p-0.5 border border-slate-700">
         <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500 w-0"></div>
@@ -60,14 +60,14 @@
       <span id="statusText" class="leading-snug">歡迎！請將手機靠近第一個 Checkpoint 開始打卡。</span>
     </div>
 
-    <!-- 4 個 Checkpoint 印章網格 -->
+    <!-- 5 個 Checkpoint 印章網格 (課程名稱已改為 13px) -->
     <div class="grid grid-cols-2 gap-3 mb-6">
       <!-- Spot 1: 數碼媒體科技 -->
       <div id="card_spot_01" class="relative group p-4 rounded-2xl bg-slate-900/60 border border-slate-700/60 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px]">
         <div id="icon_spot_01" class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all">
           <i class="fa-solid fa-lock"></i>
         </div>
-        <span class="text-xs font-semibold text-slate-300 leading-tight">數碼媒體科技</span>
+        <span class="text-[13px] font-semibold text-slate-300 leading-tight">數碼媒體科技</span>
         <span id="label_spot_01" class="text-[11px] text-slate-500 mt-1 font-mono">未解鎖</span>
       </div>
 
@@ -76,7 +76,7 @@
         <div id="icon_spot_02" class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all">
           <i class="fa-solid fa-lock"></i>
         </div>
-        <span class="text-xs font-semibold text-slate-300 leading-tight">遊戲軟件開發</span>
+        <span class="text-[13px] font-semibold text-slate-300 leading-tight">遊戲軟件開發</span>
         <span id="label_spot_02" class="text-[11px] text-slate-500 mt-1 font-mono">未解鎖</span>
       </div>
 
@@ -85,7 +85,7 @@
         <div id="icon_spot_03" class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all">
           <i class="fa-solid fa-lock"></i>
         </div>
-        <span class="text-xs font-semibold text-slate-300 leading-tight">人工智能及智慧科技</span>
+        <span class="text-[13px] font-semibold text-slate-300 leading-tight">人工智能及智慧科技</span>
         <span id="label_spot_03" class="text-[11px] text-slate-500 mt-1 font-mono">未解鎖</span>
       </div>
 
@@ -94,18 +94,27 @@
         <div id="icon_spot_04" class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all">
           <i class="fa-solid fa-lock"></i>
         </div>
-        <span class="text-xs font-semibold text-slate-300 leading-tight">網路安全</span>
+        <span class="text-[13px] font-semibold text-slate-300 leading-tight">網路安全</span>
         <span id="label_spot_04" class="text-[11px] text-slate-500 mt-1 font-mono">未解鎖</span>
+      </div>
+
+      <!-- Spot 5: Booth -->
+      <div id="card_spot_05" class="col-span-2 relative group p-4 rounded-2xl bg-slate-900/60 border border-slate-700/60 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px]">
+        <div id="icon_spot_05" class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <span class="text-[13px] font-semibold text-slate-300 leading-tight">Booth</span>
+        <span id="label_spot_05" class="text-[11px] text-slate-500 mt-1 font-mono">未解鎖</span>
       </div>
     </div>
 
     <!-- 兌換按鈕 -->
     <button id="rewardBtn" onclick="handleClaimRewardClick()" disabled class="w-full py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 bg-slate-700 text-slate-400 cursor-not-allowed">
       <i class="fa-solid fa-gift"></i>
-      <span>集齊 4 個章即可換領禮品</span>
+      <span>集齊 5 個章即可換領禮品</span>
     </button>
 
-    <!-- 測試用重設按鈕 (需輸入密碼: king) -->
+    <!-- 測試用重設按鈕 (密碼: king) -->
     <div class="mt-4 text-center">
       <button onclick="resetProgress()" class="text-xs text-slate-500 hover:text-slate-400 transition-colors underline decoration-dotted underline-offset-4">
         重設打卡進度 (測試用)
@@ -138,21 +147,22 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, get, set, goOffline } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+    // ⚠️ 替換成你自己在 Firebase Console 取得的設定檔內容
     const firebaseConfig = {
-      apiKey: "AIzaSyBBuhkwjqLrHXu0DQfSvQAKXQw64-ODj98",
-      authDomain: "hkiit-nfc-stamp.firebaseapp.com",
-      databaseURL: "https://hkiit-nfc-stamp-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "hkiit-nfc-stamp",
-      storageBucket: "hkiit-nfc-stamp.firebasestorage.app",
-      messagingSenderId: "1093481627008",
-      appId: "1:1093481627008:web:35e8c383d475b144c61565"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
     };
 
     // 初始化 Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const ALL_SPOTS = ['spot_01', 'spot_02', 'spot_03', 'spot_04'];
+    const ALL_SPOTS = ['spot_01', 'spot_02', 'spot_03', 'spot_04', 'spot_05'];
 
     // 取得或生成裝置獨特識別碼 Device ID
     function getDeviceId() {
@@ -181,13 +191,15 @@
         const label = document.getElementById(`label_${spotId}`);
 
         if (history.includes(spotId)) {
-          card.className = "relative group p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/40 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px]";
+          const isBooth = spotId === 'spot_05';
+          card.className = `relative group p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/40 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px] ${isBooth ? 'col-span-2' : ''}`;
           icon.className = "w-10 h-10 rounded-full stamp-unlocked text-white flex items-center justify-center text-base mb-2 transition-all";
           icon.innerHTML = '<i class="fa-solid fa-check"></i>';
           label.className = "text-[11px] text-emerald-400 font-semibold mt-1 font-mono";
           label.innerText = "已完成";
         } else {
-          card.className = "relative group p-4 rounded-2xl bg-slate-900/60 border border-slate-700/60 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px]";
+          const isBooth = spotId === 'spot_05';
+          card.className = `relative group p-4 rounded-2xl bg-slate-900/60 border border-slate-700/60 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[120px] ${isBooth ? 'col-span-2' : ''}`;
           icon.className = "w-10 h-10 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center text-base mb-2 transition-all";
           icon.innerHTML = '<i class="fa-solid fa-lock"></i>';
           label.className = "text-[11px] text-slate-500 mt-1 font-mono";
@@ -278,7 +290,7 @@
       if (!currentSpot) {
         const msg = history.length === ALL_SPOTS.length
           ? '你已集齊所有印章，請點擊下方按鈕領取禮品！'
-          : `歡迎！目前進度 ${history.length}/4，請尋找下一個 Checkpoint 拍卡。`;
+          : `歡迎！目前進度 ${history.length}/${ALL_SPOTS.length}，請尋找下一個 Checkpoint 拍卡。`;
         updateUI(history, msg, 'info');
         return;
       }
@@ -289,7 +301,7 @@
       }
 
       if (history.includes(currentSpot)) {
-        updateUI(history, `這個 Checkpoint 之前已經打過卡囉！目前進度 ${history.length}/4。`, 'warn');
+        updateUI(history, `這個 Checkpoint 之前已經打過卡囉！目前進度 ${history.length}/${ALL_SPOTS.length}。`, 'warn');
         return;
       }
 
@@ -297,9 +309,9 @@
       localStorage.setItem('nfc_stamp_history', JSON.stringify(history));
 
       if (history.length === ALL_SPOTS.length) {
-        updateUI(history, '恭喜你！已集齊 4 個 Checkpoint 印章！', 'success');
+        updateUI(history, `恭喜你！已集齊 ${ALL_SPOTS.length} 個 Checkpoint 印章！`, 'success');
       } else {
-        updateUI(history, `打卡成功！已收集 ${history.length}/4 個印章。`, 'success');
+        updateUI(history, `打卡成功！已收集 ${history.length}/${ALL_SPOTS.length} 個印章。`, 'success');
       }
     }
 
@@ -319,6 +331,7 @@
       content.classList.add('scale-95');
     }
 
+    // 密碼保護重設邏輯 (密碼：king)
     function resetProgress() {
       const pwd = prompt('請輸入管理員密碼以重設打卡紀錄：');
       if (pwd === 'king') {
